@@ -45,7 +45,16 @@ classdef rc9_serial < handle
              end
 
          end
-
+         function disconnect(obj)
+            if ~isempty(obj.serial_obj) && isvalid(obj.serial_obj)
+                configureCallback(obj.serial_obj, "off"); % 关闭回调函数
+                delete(obj.serial_obj); % 删除串口对象
+                obj.serial_obj = [];
+                disp("Serial connection closed successfully.");
+            else
+                disp("No active serial connection to close.");
+            end
+         end
 
         function handle_data(obj)
 
@@ -132,6 +141,14 @@ classdef rc9_serial < handle
 
 
         end
+        function delete(obj)
+            obj.disconnect();
+        end
+
+        function float_datas=get_float_data(obj)
+            float_datas=obj.rx_frame.msg_get;
+        end
+
 
 
 
