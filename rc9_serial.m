@@ -138,6 +138,7 @@ classdef rc9_serial < handle
             obj.tx_frame.send_buff(8 + obj.tx_frame.data_lenth) = obj.FRAME_END_1;
 
             write(obj.serial_obj, obj.tx_frame.send_buff, 'uint8');
+            disp("send_success");
 
 
         end
