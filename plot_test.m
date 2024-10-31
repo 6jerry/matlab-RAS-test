@@ -16,6 +16,7 @@ sin_text = text(ax1, 0, 0, '', 'Color', 'w', 'FontSize', 10); % 正弦曲线的y
 
 f2 = figure('Name', 'Measured Data - Cos', 'NumberTitle', 'off');
 ax2 = axes(f2);  % f2窗口的坐标轴
+global p_cos cos_text % 声明全局变量
 p_cos = plot(ax2, t, m_cos, 'b', 'MarkerSize', 5);  % 余弦曲线
 hold on;
 axis(ax2, [-1.5 * pi, -1.5 * pi + 2 * pi, -1.5, 1.5]);
@@ -24,7 +25,7 @@ set(ax2, 'Color', 'k', 'GridColor', 'w');
 cos_text = text(ax2, 0, 0, '', 'Color', 'w', 'FontSize', 10); % 余弦曲线的y值标注
 
 % 创建两个定时器对象
-t_update = 0.01; % 时间步长
+t_update = 0.05; % 时间步长
 timerSin = timer('ExecutionMode', 'fixedRate', ...
                  'Period', t_update, ...
                  'TimerFcn', @(~,~) updateSinPlot(ax1), ...
@@ -37,17 +38,17 @@ timerCos = timer('ExecutionMode', 'fixedRate', ...
 
 % 启动两个定时器
 start(timerSin);
-start(timerCos);
+%start(timerCos);
 
 % 定时器1的回调函数：更新正弦曲线
 function updateSinPlot(ax1)
     global p_sin sin_text timerSin
     persistent i x1
-    if isempty(i), i = 1; x1 = -1.5 * pi; end
+    if isempty(i), i = 1; x1 = 0; end
     
     % 更新正弦曲线数据
-    t = [p_sin.XData 0.1 * i];
-    m_sin = [p_sin.YData sin(0.01 * i)];
+    t = [p_sin.XData 0.05 * i];
+    m_sin = [p_sin.YData sin(0.05 * i)];
     % 限制数据量：仅保留最近1000个点
     if length(t) > 1000
         t = t(end-999:end);
@@ -59,8 +60,8 @@ function updateSinPlot(ax1)
     set(sin_text, 'Position', [t(end), m_sin(end)], 'String', sprintf('%.2f', m_sin(end)));
     
     % 更新X轴范围
-    x1 = x1 + 0.1;    
-    axis(ax1, [x1 x1 + 2 * pi -1.5 1.5]);
+    x1 = x1 + 0.05;    
+    axis(ax1, [x1-4 x1 + 1 -1.5 1.5]);
     
     % 停止条件
     if i > 100000
@@ -100,6 +101,9 @@ function updateCosPlot(ax2)
     end
     j = j + 1;
 end
+
+
+
 
 
 

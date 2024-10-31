@@ -18,8 +18,6 @@ classdef dynamic_plot  < handle
             obj.figs.Delay=delay;
             obj.figs.figure_handle=figure('Name', obj.figs.Name, 'NumberTitle', 'off');
             obj.figs.title=title;
-            obj.figs.axis_x=axis_x;
-            obj.figs.axis_y=axis_y;
 % 在 MATLAB 中，可以通过设置 figure 的 Position 属性来控制窗口的大小和位置。Position 属性是一个包含四个元素的向量 [left, bottom, width, height]，分别表示：
 % 
 % left：窗口左边距，距离屏幕左侧的像素数
@@ -34,10 +32,10 @@ classdef dynamic_plot  < handle
              obj.figs. y_label= y_label;
             ylabel(obj.figs.axis_handle,  obj.figs.y_label);
              grid on;
-             obj.figs.timer_handle=timer('ExecutionMode', 'fixedSpacing', ...
+             obj.figs.timer_handle=timer('ExecutionMode', 'fixedRate', ...
                                'Period',  obj.figs.Delay, ...
                                'TimerFcn', {@obj.timerCallback}...
-                               ,'BusyMode','drop','Name',obj.figs.Name);
+                               ,'BusyMode','queue','Name',obj.figs.Name);
 
             
 
@@ -109,21 +107,23 @@ classdef dynamic_plot  < handle
                obj.figs.x=0;
                obj.figs.speed=speed;
                axis(obj.figs.axis_handle,[obj.figs.x+obj.figs.delta_time(1) obj.figs.x+obj.figs.delta_time(2)  obj.figs.delta_y(1) obj.figs.delta_y(2)]);
-                start(obj.figs.timer_handle);
-             
+
+             start(obj.figs.timer_handle);
 
          end
          function stoploting(obj)
-             stop(obj.figs.timer_handle);
+            stop(obj.figs.timer_handle);
+           
+         end
+         
+         function killfigure(obj)
+            stop(obj.figs.timer_handle);
             delete(obj.figs.timer_handle);
             delete(obj.figs.figure_handle);
-         end
-       
-         function set_data(obj,curveid,data)
-
-              obj.figs.curves(curveid).data=data;
 
          end
+
+         function set_data(obj,)
 
 
 
