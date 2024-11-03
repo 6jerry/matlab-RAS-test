@@ -27,6 +27,7 @@ classdef rc9_serial < handle
             'msg_get',single([]),'crc_code',uint8([]),'send_buff',uint8([]));
 
         serial_obj;
+        if_hear_flag=0;
         
     end
 
@@ -108,6 +109,7 @@ classdef rc9_serial < handle
                         obj.rx_frame.msg_get=typecast(obj.rx_frame.msg_buff,'single');
                         disp(obj.rx_frame.msg_get);
                         obj.state = 'WAITING_FOR_HEADER_0';
+                        obj.if_hear_flag=1;
                     else
                         disp("end1 error "+num2str(obj.rx_byte));
                         obj.state = 'WAITING_FOR_HEADER_0';
@@ -148,6 +150,10 @@ classdef rc9_serial < handle
 
         function float_datas=get_float_data(obj)
             float_datas=obj.rx_frame.msg_get;
+        end
+
+        function if_hear=get_hearstatus(obj)
+                if_hear=obj.if_hear_flag;
         end
 
 

@@ -24,7 +24,7 @@ for i = 1:length(t)
     set(plotHandle, 'XData', t(1:i), 'YData', speed(1:i));
     
     % 更新动态文本的位置和显示的值
-    set(dynamicText, 'Position', [t(i), speed(i)], 'String', sprintf('%.2f m/s', speed(i)));
+    set(dynamicText, 'Position', [t(i), speed(i)], 'String', sprintf('%.2f', speed(i)));
     
     % 强制刷新图像
     drawnow;

@@ -1,18 +1,11 @@
 classdef dynamic_plot  < handle
 
     properties (Access=public)
-        figs;%每一个动态曲线区的结构体，包含窗口句柄，定时器句柄，axis句柄,要绘制的变量
-        
-        
-
-
+        figs;%动态曲线区的结构体，包含窗口句柄，定时器句柄，axis句柄,要绘制的变量
     end
 
     methods
         function create_figure(obj,delay,position,name,title,axis_x,axis_y,y_label)
-            
-            
-
             obj.figs.Name=name;
             obj.figs.Position=position;
             obj.figs.Delay=delay;
@@ -27,13 +20,14 @@ classdef dynamic_plot  < handle
 % width：窗口宽度，单位为像素
 % height：窗口高度，单位为像素
             obj.figs.figure_handle.Position= obj.figs.Position;
-            obj.figs.axis_handle=axes(obj.figs.figure_handle,'Units', 'normalized');%设置坐标区能够动态变化
+            obj.figs.axis_handle=axes(obj.figs.figure_handle,'Units', 'normalized','Position', [0.05, 0.05, 0.9, 0.9]);%设置坐标区能够动态变化
             set(obj.figs.axis_handle, 'Color', 'k', 'GridColor', 'w');  % 设置背景和网格
              axis(obj.figs.axis_handle,[axis_x(1) axis_x(2) axis_y(1) axis_y(2)]);%设置坐标轴初始范围
              xlabel(obj.figs.axis_handle, 'Time');
              obj.figs. y_label= y_label;
             ylabel(obj.figs.axis_handle,  obj.figs.y_label);
              grid on;
+             %title(obj.figs.axis_handle, obj.figs.title); % 设置标题
              obj.figs.timer_handle=timer('ExecutionMode', 'fixedSpacing', ...
                                'Period',  obj.figs.Delay, ...
                                'TimerFcn', {@obj.timerCallback}...
@@ -47,18 +41,23 @@ classdef dynamic_plot  < handle
          function timerCallback(obj, ~, ~)
 
             obj.figs.time_array = [obj.figs.time_array  obj.figs.time_array(end)+obj.figs.speed];%刷新x轴
-              %disp(length(obj.figs.time_array));
+             
              for j=1:length(obj.figs.curves)
                 obj.figs.curves(j).y_array=[obj.figs.curves(j).y_array obj.figs.curves(j).data];
                 if length(obj.figs.curves(j).y_array) > 3000
                     obj.figs.curves(j).y_array = obj.figs.curves(j).y_array(end-2999:end);
                     obj.figs.time_array = obj.figs.time_array(end-2999:end);
                 end
-                %disp(length(obj.figs.curves(j).y_array));
+                set(obj.figs.curves(j).text_handle, 'Position', [obj.figs.time_array(end-obj.figs.curves(j).textvalue), obj.figs.curves(j).y_array(end-obj.figs.curves(j).textvalue)], 'String', sprintf('%s:%.2f',obj.figs.curves(j).text, obj.figs.curves(j).y_array(end)));
                 set(obj.figs.curves(j).plot_handle,'XData', obj.figs.time_array, 'YData', obj.figs.curves(j).y_array);
+                % 更新y值标注
+               
+                
+    
                 
              end
-             drawnow;
+                 drawnow limitrate;
+           
 
             obj.figs.x=obj.figs.x+obj.figs.speed;
             axis(obj.figs.axis_handle,[obj.figs.x+obj.figs.delta_time(1) obj.figs.x + obj.figs.delta_time(2)  obj.figs.delta_y(1) obj.figs.delta_y(2)]);
@@ -96,10 +95,11 @@ classdef dynamic_plot  < handle
                hold(obj.figs.axis_handle, 'on');
               for j=1:length(obj.figs.curves)
                   obj.figs.curves(j).y_array=[0];
-                   obj.figs.curves(j).plot_handle=plot(obj.figs.time_array,obj.figs.curves(j).y_array,'LineStyle',obj.figs.curves(j).lineStyle...
+                   obj.figs.curves(j).plot_handle=plot(obj.figs.axis_handle,obj.figs.time_array,obj.figs.curves(j).y_array,'LineStyle',obj.figs.curves(j).lineStyle...
                        ,'LineWidth',obj.figs.curves(j).lineWidth,'DisplayName',obj.figs.curves(j).text,'Color',obj.figs.curves(j).colour);
 
-                  
+                  obj.figs.curves(j).text_handle = text(obj.figs.axis_handle, 0, 0, obj.figs.curves(j).text, 'Color', 'w', 'FontSize', ...
+                      obj.figs.curves(j).textFontSize);
 
 
               end
@@ -118,6 +118,10 @@ classdef dynamic_plot  < handle
             delete(obj.figs.timer_handle);
             delete(obj.figs.figure_handle);
          end
+
+         function pauseploting(obj)
+              stop(obj.figs.timer_handle);
+         end
        
          function set_data(obj,curveid,data)
 
@@ -125,6 +129,27 @@ classdef dynamic_plot  < handle
 
          end
 
+         function set_visible_x(obj,visible_x)
+            obj.figs.delta_time=visible_x;
+         end
+         function set_visible_y(obj,visible_y)
+             obj.figs.delta_y=visible_y;
+         end
+
+         function set_text_pos(obj,id,textpos)
+            obj.figs.curves(id).textvalue=textpos;
+
+         end
+         function add_curve(obj,curveData)
+             obj.figs.curves(curveData.id).data=curveData.data;
+                    obj.figs.curves(curveData.id).text=curveData.text;
+                    obj.figs.curves(curveData.id).textvalue=curveData.textvalue;
+                     obj.figs.curves(curveData.id).lineWidth=curveData.lineWidth;
+                     obj.figs.curves(curveData.id).lineStyle=curveData.lineStyle;%实线 ('-'),虚线 ('--'),点线 (':'),点划线 ('-.')
+                     obj.figs.curves(curveData.id).textFontSize=curveData.textFontSize;
+                     obj.figs.curves(curveData.id).colour=curveData.colour;
+         end
+        
 
 
     end
